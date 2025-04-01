@@ -2,6 +2,9 @@
   "name": "frontend-monorepo",
   "version": "1.0.0",
   "packageManager": "pnpm@7.33.7",
+  "script": {
+    "dev": "pnpm -r dev"
+  },
   "devDependencies": {
     "@antfu/eslint-config": "^0.25.2",
     "@antfu/ni": "^0.16.3",
