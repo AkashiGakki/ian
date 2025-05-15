@@ -1,6 +1,7 @@
 import './style.css'
 
-import MiniVue from './vue.ts'
+import MiniVue from '@ian/mini-vue'
+
 import typescriptLogo from './typescript.svg'
 import viteLogo from '/vite.svg'
 import { setupCounter } from './counter.ts'
@@ -17,9 +18,8 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     <div class="card">
       <button id="counter" type="button"></button>
     </div>
-    <p class="read-the-docs">
-      Click on the Vite and TypeScript logos to learn more
-    </p>
+
+    <div id="template-app">
   </div>
 `
 
@@ -27,4 +27,4 @@ setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
 
 const { createApp, templateApp } = MiniVue
 const app = createApp(templateApp)
-app.mount('#app')
+app.mount('#template-app')

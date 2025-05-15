@@ -43,7 +43,7 @@ const App: AppType = {
 const MiniVue = {
   createApp: (config: { template: string; setup: Function }) => {
     const compile = (template: string) => {
-      // content type is setup function return
+      // `content` type is setup function return
       return (content: any, dom: HTMLElement) => {
         dom.innerHTML = ''
         const input = document.createElement('input')
@@ -54,14 +54,13 @@ const MiniVue = {
         input.setAttribute('value', content.state.message)
         dom.appendChild(input)
 
-        let button = dom.querySelector('button')
-        button = document.createElement('button')
+        const button = document.createElement('button')
         button.addEventListener('click', () => {
           return content.click.apply(content.message)
         })
         button.innerText = content.state.message
         dom.appendChild(button)
-        console.log('template', template)
+        // console.log('template', template)
       }
     }
 

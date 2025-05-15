@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "@ian/mini-vue": "workspace:^*",
+    "@ian/mini-vue": "workspace:*",
     "typescript": "~5.8.3",
     "vite": "^6.3.5"
   }
