@@ -1,9 +1,11 @@
+import { reactive, watchEffect } from "./reactivity"
+
 interface AppType {
   template: string
   setup: () => { state: any; click: () => void }
 }
 // 定义响应函数
-let effective: Function = () => { }
+// let effective: Function = () => { }
 
 const App: AppType = {
   // 视图
@@ -13,20 +15,8 @@ const App: AppType = {
   `,
   setup(): { state: any; click: () => void } {
     // 数据劫持
-    const state = new Proxy({
-      message: 'Hello',
-    }, {
-      set(target, key, value, receiver) {
-        // console.log('set', target, key, value, receiver)
-        const ret = Reflect.set(target, key, value, receiver)
-        // 触发函数响应
-        effective()
-        return ret
-      },
-      get(target, key, receiver) {
-        // console.log('get', target, key, receiver)
-        return Reflect.get(target, key, receiver)
-      },
+    const state = reactive({
+      message: 'Hello Mini Vue',
     })
 
     const click = () => {
@@ -61,7 +51,7 @@ const MiniVue = {
         button.innerText = content.state.message
         dom.appendChild(button)
 
-        console.log('template', template)
+        // console.log('template', template)
       }
     }
 
@@ -74,7 +64,10 @@ const MiniVue = {
 
         const setupResult = config.setup()
 
-        effective = () => render(setupResult, dom)
+        // 修改
+        // effective = () => render(setupResult, dom)
+        watchEffect(() => render(setupResult, dom))
+
         render(setupResult, dom)
       },
     }
@@ -83,7 +76,3 @@ const MiniVue = {
 }
 
 export default MiniVue
-
-// const { createApp } = MiniVue
-// const app = createApp(App)
-// app.mount('#app')
