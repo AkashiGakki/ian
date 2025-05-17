@@ -1,20 +1,21 @@
 import { reactive, watchEffect } from "./reactivity"
+import { h, mountElement, diff } from './runtime'
 
 interface AppType {
-  template: string
+  render: (content: any) => void
   setup: () => { state: any; click: () => void }
 }
-// 定义响应函数
-// let effective: Function = () => { }
 
 const App: AppType = {
   // 视图
-  template: `
-    <input />
-    <button>Button</button>
-  `,
+  render(content: any) {
+    return h('div', null, [
+      h('h1', null, String(content.state.message)),
+      h('button', { onClick: content.click }, 'click me'),
+    ])
+  },
+
   setup(): { state: any; click: () => void } {
-    // 数据劫持
     const state = reactive({
       message: 'Hello Mini Vue',
     })
@@ -30,45 +31,34 @@ const App: AppType = {
 // ---------- MiniVue ----------
 
 const MiniVue = {
-  createApp: (config: { template: string; setup: Function }) => {
-    // 编译器
-    const compile = (template: string) => {
-      return (content: any, dom: HTMLElement) => {
-        dom.innerHTML = ''
-
-        const input = document.createElement('input')
-        input.addEventListener('keyup', (e) => {
-          const value = (e.target as HTMLInputElement).value
-          content.state.message = value
-        })
-        input.setAttribute('value', content.state.message)
-        dom.appendChild(input)
-
-        const button = document.createElement('button')
-        button.addEventListener('click', () => {
-          return content.click.apply(content.message)
-        })
-        button.innerText = content.state.message
-        dom.appendChild(button)
-
-        // console.log('template', template)
-      }
-    }
-
-    // 渲染
-    const render = compile(config.template)
-
+  createApp: (config: { render: Function; setup: Function }) => {
     return {
       mount(container: string): void {
         const dom = document.querySelector(container) as HTMLElement
 
         const setupResult = config.setup()
+        const render = config.render(setupResult)
 
-        // 修改
-        // effective = () => render(setupResult, dom)
-        watchEffect(() => render(setupResult, dom))
+        let isMounted = false
+        let prevSubTree: any = null
 
-        render(setupResult, dom)
+        watchEffect(() => {
+          if (!isMounted) {
+            // clear content before mounting
+            dom.innerHTML = ""
+
+            // mount
+            isMounted = true
+            const subTree = config.render(setupResult)
+            prevSubTree = subTree
+            mountElement(subTree, dom)
+          } else {
+            // update
+            const subTree = config.render(setupResult)
+            diff(prevSubTree, subTree)
+            prevSubTree = subTree
+          }
+        })
       },
     }
   },
