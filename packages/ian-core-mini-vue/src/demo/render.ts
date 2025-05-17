@@ -1,4 +1,156 @@
-import type { VNode } from '../types'
+interface AppType {
+  render: (content: any) => void
+  setup: () => { state: any; click: () => void }
+}
+
+const App: AppType = {
+  // 视图
+  render(content: any) {
+    return h('div', null, [
+      h('h1', null, String(content.state.message)),
+      h('button', { onClick: content.click }, 'click me'),
+    ])
+  },
+
+  setup(): { state: any; click: () => void } {
+    const state = reactive({
+      message: 'Hello Mini Vue',
+    })
+
+    const click = () => {
+      state.message = state.message.split('').reverse().join('')
+    }
+
+    return { state, click }
+  },
+}
+
+// ---------- MiniVue ----------
+
+const MiniVue = {
+  createApp: (config: { render: Function; setup: Function }) => {
+    return {
+      mount(container: string): void {
+        const dom = document.querySelector(container) as HTMLElement
+
+        const setupResult = config.setup()
+        const render = config.render(setupResult)
+
+        let isMounted = false
+        let prevSubTree: any = null
+
+        watchEffect(() => {
+          if (!isMounted) {
+            // clear content before mounting
+            dom.innerHTML = ""
+
+            // mount
+            isMounted = true
+            const subTree = config.render(setupResult)
+            prevSubTree = subTree
+            mountElement(subTree, dom)
+          } else {
+            // update
+            const subTree = config.render(setupResult)
+            diff(prevSubTree, subTree)
+            prevSubTree = subTree
+          }
+        })
+      },
+    }
+  },
+  templateApp: App as AppType,
+}
+
+export default MiniVue
+
+// ---------- reactivity ----------
+type EffectFn = () => void
+
+let currentEffect: EffectFn | null
+
+class Dep {
+  private _effects: Set<Function>
+
+  constructor() {
+    this._effects = new Set()
+  }
+
+  // public depend(fn: Function) {
+  //   this._effects.add(fn)
+  // }
+
+  // public notify() {
+  //   this._effects.forEach((fn) => fn())
+  // }
+
+  depend() {
+    if (currentEffect) {
+      this._effects.add(currentEffect)
+    }
+  }
+
+  notify() {
+    this._effects.forEach((fn) => fn())
+  }
+}
+
+const watchEffect = (effect: EffectFn): void => {
+  currentEffect = effect
+  effect()
+  currentEffect = null
+}
+
+const targetMap = new WeakMap()
+
+const getDep = (target: any, key: string | symbol) => {
+  let depsMap = targetMap.get(target)
+  if (!depsMap) {
+    depsMap = new Map()
+    targetMap.set(target, depsMap)
+  }
+
+  let dep = depsMap.get(key)
+  if (!dep) {
+    dep = new Dep()
+    depsMap.set(key, dep)
+  }
+  return dep
+}
+
+function reactive(raw: Record<string, any>): Record<string, any> {
+
+  return new Proxy(raw, {
+    get(target, key) {
+      const dep = getDep(target, key)
+      dep.depend()
+      return Reflect.get(target, key)
+    },
+    set(target, key, value) {
+      const dep = getDep(target, key)
+      const result = Reflect.set(target, key, value)
+      dep.notify()
+      return result
+    },
+  })
+}
+
+// ---------- render ----------
+
+export interface VNode extends Element {
+  tag: string;
+  props: any;
+  children: any;
+  el?: any;
+}
+
+export function h(tag: string, props: any, children: any): VNode {
+  return {
+    tag,
+    props,
+    children,
+  } as VNode
+}
 
 export function mountElement(vNode: VNode, container: HTMLElement): void {
   const el = (vNode.el = createElement(vNode.tag))
