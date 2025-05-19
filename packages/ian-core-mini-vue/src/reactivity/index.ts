@@ -51,7 +51,7 @@ const getDep = (target: any, key: string | symbol) => {
   return dep
 }
 
-function reactive(raw: Record<string, any>): Record<string, any> {
+function reactive<T extends object>(raw: T): T {
 
   return new Proxy(raw, {
     get(target, key) {
@@ -68,7 +68,7 @@ function reactive(raw: Record<string, any>): Record<string, any> {
   })
 }
 
-function ref(rawVal: string | number | boolean): { value: any } {
+function ref<T>(rawVal: T): { value: T | Record<string, any> | null } {
   if (typeof rawVal !== 'object') {
     return {
       value: rawVal,

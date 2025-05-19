@@ -1,21 +1,21 @@
 import { reactive, watchEffect } from "./reactivity"
 import { h, mountElement, diff } from './runtime'
 
-interface AppType {
-  render: (content: any) => void
-  setup: () => { state: any; click: () => void }
+interface AppType<T = any> {
+  render: (content: T) => ReturnType<typeof h>;
+  setup: () => T;
 }
 
-const App: AppType = {
-  // 视图
-  render(content: any) {
+const App: AppType<{ state: { message: string }; click: () => void }> = {
+
+  render(content) {
     return h('div', null, [
       h('h1', null, String(content.state.message)),
       h('button', { onClick: content.click }, 'click me'),
     ])
   },
 
-  setup(): { state: any; click: () => void } {
+  setup() {
     const state = reactive({
       message: 'Hello Mini Vue',
     })
@@ -31,7 +31,10 @@ const App: AppType = {
 // ---------- MiniVue ----------
 
 const MiniVue = {
-  createApp: (config: { render: Function; setup: Function }) => {
+  createApp: <T>(config: {
+     render: (content: T) => ReturnType<typeof h>;
+     setup: () => T
+  }) => {
     return {
       mount(container: string): void {
         const dom = document.querySelector(container) as HTMLElement
