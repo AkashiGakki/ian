@@ -1,16 +1,16 @@
 {
-  "name": "ian-web-ext-group-tag",
-  "displayName": "Ian web ext group tag",
+  "name": "ian-ext-web",
+  "displayName": "Ian Ext Web",
   "version": "0.0.1",
   "description": "A basic Plasmo extension.",
-  "author": "<akashi_sai@163.com>",
+  "author": "akashi_sai@163.com",
   "scripts": {
     "dev": "plasmo dev",
     "build": "plasmo build",
     "package": "plasmo package"
   },
   "dependencies": {
-    "plasmo": "0.90.3",
+    "plasmo": "0.90.5",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },
@@ -26,6 +26,9 @@
   "manifest": {
     "host_permissions": [
       "https://*/*"
+    ],
+    "permissions": [
+      "tabs"
     ]
   }
 }

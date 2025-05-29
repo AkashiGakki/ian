@@ -1,6 +1,6 @@
-# frontend-monorepo
+# IAN
 
-Opinionated Frontend Monorepo Starter Template
+Frontend Monorepo
 
 ## License
 
