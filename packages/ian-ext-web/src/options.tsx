@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useStorage } from '@plasmohq/storage/hook'
 
 function IndexOptions() {
-  const [data, setData] = useState('')
+  const [openCount] = useStorage<number>('open-count')
+  const [checked] = useStorage<boolean>('checked')
+  const [serialNumber] = useStorage<string>('serial-number')
 
   return (
     <div
@@ -10,11 +12,13 @@ function IndexOptions() {
         flexDirection: 'column',
         padding: 16,
       }}>
-      <h1>
-        Welcome to your <a href="https://www.plasmo.com">Plasmo</a> Extension!
-      </h1>
-      <input onChange={e => setData(e.target.value)} value={data} />
-      <footer>Crafted by @PlasmoHQ</footer>{' '}
+      <p>Times opened: {openCount}</p>
+      <input
+        type={'checkbox'}
+        readOnly
+        checked={checked === undefined ? true : checked}
+      />
+      <i>#{serialNumber || 0}</i>
     </div>
   )
 }
